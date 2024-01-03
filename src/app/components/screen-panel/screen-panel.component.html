@@ -1,0 +1,8 @@
+<div class="container">
+  {{ panel.zIndex }}
+  <img
+    [src]="panel.dataUrl"
+    alt="image slice"
+    [ngStyle]="{ transform: 'translateY(' + panel.zIndex * PANEL_OFFSET_FACTOR + 'px)' }"
+    (click)="handlePanelClick()" />
+</div>

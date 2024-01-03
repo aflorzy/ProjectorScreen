@@ -1,0 +1,22 @@
+<img #sourceImage hidden src="assets/images/img.jpg" alt="image source" />
+
+<button (click)="resetAnimationStateList()">Reset Animation</button>
+
+<div class="container">
+  <div class="panels">
+    <app-screen-panel
+      *ngFor="let panel of panelList; let i = index"
+      [panel]="panel"
+      [ngStyle]="{ zIndex: 100 + panel.zIndex }"
+      (clicked)="handlePanelClick(i)"
+      [@panelMovement]="{
+        value: animationStateList[i],
+        params: {
+          offsetFactorTranslate: calculateAnimationOffsetFactor(i) * BASE_TRANSLATE_PERCENTAGE,
+          offsetFactorTiming: calculateAnimationOffsetFactor(i) * BASE_TIMING_MS
+        }
+      }">
+    </app-screen-panel>
+  </div>
+  <div class="stage" [ngStyle]="{ 'width.px': stageWidth * 1.05 }"></div>
+</div>
