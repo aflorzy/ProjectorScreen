@@ -4,3 +4,10 @@ export interface Panel {
   zIndex: number;
   dataUrl: string;
 }
+
+export interface ElemPosition {
+  left: number;
+  top: number;
+  right?: number;
+  bottom?: number;
+}

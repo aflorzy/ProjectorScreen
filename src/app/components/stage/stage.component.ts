@@ -1,9 +1,11 @@
 import { animate, state, style, transition, trigger } from "@angular/animations";
 import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild } from "@angular/core";
+import { Observable } from "rxjs";
 import { Cache } from "src/app/decorators/cache.decorator";
 import { ZIndexOrder } from "src/app/enums";
-import { Panel } from "src/app/interfaces";
+import { ElemPosition, Panel } from "src/app/interfaces";
 import { ImageSliceService } from "src/app/services/image-slice.service";
+import { PanelState } from "src/app/types";
 
 @Component({
   selector: "app-stage",
@@ -19,14 +21,14 @@ import { ImageSliceService } from "src/app/services/image-slice.service";
       }),
       transition(
         "left => start, right => start",
-        [animate("{{ offsetFactorTiming }}ms ease-in-out", style({ transform: "translateX(0)" }))],
+        [animate("{{ offsetFactorTiming }}ms ease-out", style({ transform: "translateX(0)" }))],
         {
           params: { offsetFactorTiming: "500" }
         }
       ),
       transition(
         "start => left, start => right",
-        [style({ transform: "translateX(0)" }), animate("{{ offsetFactorTiming }}ms ease-in-out")],
+        [style({ transform: "translateX(0)" }), animate("{{ offsetFactorTiming }}ms ease-out")],
         {
           params: { offsetFactorTiming: "500" }
         }
@@ -36,14 +38,16 @@ import { ImageSliceService } from "src/app/services/image-slice.service";
 })
 export class StageComponent implements AfterViewInit {
   @ViewChild("sourceImage", { static: false }) sourceImageRef!: ElementRef;
+
   panelList: Panel[] = [];
   animationStateList: string[] = [];
+  panelElemPositionList: Observable<ElemPosition>[] = [];
+  stageWidth!: number;
 
   private readonly NUM_PANELS = 10;
   private readonly zIndexOrder: ZIndexOrder = ZIndexOrder.ASCENDING;
   public readonly BASE_TRANSLATE_PERCENTAGE = 100;
   public readonly BASE_TIMING_MS = 500;
-  stageWidth!: number;
 
   constructor(
     private imageSliceService: ImageSliceService,
@@ -149,6 +153,29 @@ export class StageComponent implements AfterViewInit {
 
   resetAnimationStateList(): void {
     this.animationStateList = Array(this.NUM_PANELS).fill("start");
+  }
+
+  state: PanelState = "closed";
+  animateScreen(nextState: PanelState) {
+    const indexMiddleRight: number = Math.floor(this.NUM_PANELS / 2);
+    switch (nextState) {
+      case "opening":
+      case "closing":
+        break;
+      case "open":
+        // Move left half to the left, and right half to the right
+        this.animationStateList = this.animationStateList.map((state: string, index: number) =>
+          index < indexMiddleRight ? "left" : "right"
+        );
+        break;
+      case "closed":
+        // Move left half to the right, and right half to the left
+        // Extreme left and right move first (and quickest) which shows the rest of the ones behind it that havent moved yet
+        this.animationStateList = this.animationStateList.fill("start");
+        break;
+    }
+
+    this.state = nextState;
   }
 
   /**

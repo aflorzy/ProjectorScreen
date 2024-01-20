@@ -1,10 +1,13 @@
 <img #sourceImage hidden src="assets/images/img.jpg" alt="image source" />
 
 <button (click)="resetAnimationStateList()">Reset Animation</button>
+<button (click)="animateScreen('open')">Open</button>
+<button (click)="animateScreen('closed')">Close</button>
 
 <div class="container">
   <div class="panels">
     <app-screen-panel
+      #panelElem
       *ngFor="let panel of panelList; let i = index"
       [panel]="panel"
       [ngStyle]="{ zIndex: 100 + panel.zIndex }"
